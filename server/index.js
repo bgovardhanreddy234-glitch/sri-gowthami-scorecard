@@ -47,13 +47,26 @@ async function startServer() {
     
     // Sync models to database (does not drop since force is false by default)
     await sequelize.sync();
+
+    // Auto-seed in serverless environment if database is empty
+    const { User } = require('./models');
+    const userCount = await User.count();
+    if (userCount === 0) {
+      console.log('Database is empty. Seeding default data...');
+      const seed = require('./seeders/seed');
+      await seed();
+    }
     
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
+    if (!process.env.VERCEL) {
+      app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+      });
+    }
   } catch (error) {
     console.error('Unable to connect to the database or start server:', error);
   }
 }
 
 startServer();
+
+module.exports = app;

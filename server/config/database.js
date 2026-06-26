@@ -25,8 +25,9 @@ if (dbDialect === 'mysql' || dbDialect === 'postgres') {
   );
 } else {
   // Default SQLite configuration
-  const dbFolder = path.join(__dirname, '..', 'data');
-  if (!fs.existsSync(dbFolder)) {
+  const isVercel = !!process.env.VERCEL;
+  const dbFolder = isVercel ? '/tmp' : path.join(__dirname, '..', 'data');
+  if (!isVercel && !fs.existsSync(dbFolder)) {
     fs.mkdirSync(dbFolder, { recursive: true });
   }
   
